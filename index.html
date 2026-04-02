@@ -1,0 +1,810 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1117;
+  --bg2:#1a1d27;
+  --bg3:#22263a;
+  --border:#2e3350;
+  --border2:#3d4466;
+  --text:#e8eaf6;
+  --text2:#9fa8da;
+  --text3:#5c6bc0;
+  --green:#00c896;
+  --green2:#00966e;
+  --green-bg:#0a2a20;
+  --green-text:#00e5b0;
+  --red:#ff5252;
+  --red-bg:#2a0a0a;
+  --red-text:#ff7070;
+  --blue-bg:#0a1a2a;
+  --blue-text:#64b5f6;
+  --amber:#ffab40;
+}
+body{font-family:var(--font-sans,system-ui,sans-serif);background:var(--bg);color:var(--text);}
+.wrap{padding:12px;max-width:480px;margin:0 auto;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;}
+.title{font-size:16px;font-weight:500;color:var(--text);}
+.timer-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:7px 14px;font-size:15px;font-weight:500;color:var(--green);min-width:88px;text-align:center;letter-spacing:1px;}
+.timer-box.warn{color:var(--red);background:var(--red-bg);border-color:#5a1a1a;}
+.progress-bar{width:100%;height:3px;background:var(--bg3);border-radius:2px;margin-bottom:14px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s;}
+.soal-dot-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.soal-dot{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;background:var(--bg2);color:var(--text2);transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.soal-dot.answered{background:#0d2a1e;color:var(--green);border-color:var(--green2);}
+.soal-dot.active{background:var(--green);color:#000;border-color:var(--green);font-weight:600;}
+.soal-dot.correct-dot{background:#0d2a1e;border-color:var(--green);color:var(--green-text);}
+.soal-dot.wrong-dot{background:var(--red-bg);border-color:var(--red);color:var(--red-text);}
+.section-badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:8px;}
+.badge-moji{background:var(--blue-bg);color:var(--blue-text);border:1px solid #1a3a5a;}
+.badge-dokkai{background:var(--green-bg);color:var(--green-text);border:1px solid #0a3a2a;}
+.soal-num{font-size:12px;color:var(--text3);margin-bottom:4px;}
+.soal-type{font-size:12px;color:var(--text2);margin-bottom:10px;font-style:italic;}
+.soal-instruction{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;background:var(--bg2);padding:10px 12px;border-radius:10px;border-left:3px solid var(--text3);}
+.passage-box{background:var(--bg2);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:14px;font-size:14px;line-height:2;color:var(--text);}
+.soal-text{font-size:16px;color:var(--text);line-height:1.8;margin-bottom:14px;font-weight:400;}
+.soal-text u{text-decoration-color:var(--amber);color:var(--amber);}
+.options{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.opt{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:var(--bg2);transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:50px;}
+.opt:active{transform:scale(0.98);}
+.opt.selected{border-color:var(--green);background:#0d2a1e;}
+.opt.correct{border-color:var(--green);background:#0d2a1e;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);}
+.opt-label{font-size:13px;font-weight:600;min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--text2);}
+.opt.selected .opt-label{background:var(--green);color:#000;}
+.opt.correct .opt-label{background:var(--green);color:#000;}
+.opt.wrong .opt-label{background:var(--red);color:#fff;}
+.opt-text{font-size:15px;color:var(--text);line-height:1.4;flex:1;}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px;}
+.btn{padding:12px 18px;border:1px solid var(--border2);border-radius:12px;background:var(--bg2);color:var(--text);font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;min-height:46px;}
+.btn:active{transform:scale(0.97);}
+.btn:disabled{opacity:0.3;cursor:not-allowed;}
+.btn-primary{background:var(--green);color:#000;border-color:var(--green);font-weight:600;}
+.btn-primary:active{background:var(--green2);}
+.explanation{margin-top:12px;padding:12px;background:var(--bg3);border-radius:12px;border-left:3px solid var(--green);font-size:13px;color:var(--text2);line-height:1.7;}
+.result-card{text-align:center;padding:1.5rem 0.5rem;}
+.result-score{font-size:56px;font-weight:600;color:var(--green);}
+.result-label{font-size:14px;color:var(--text2);margin-top:6px;margin-bottom:1.5rem;line-height:1.6;}
+.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:1.5rem;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 8px;}
+.stat-num{font-size:22px;font-weight:600;color:var(--text);}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:3px;}
+.check-icon{font-size:14px;}
+.nav-right{display:flex;gap:8px;}
+</style>
+
+<div class="wrap">
+<div id="app"></div>
+</div>
+
+<script>
+const soal=[
+  {id:1,section:"moji",type:"Yomikata — Cara baca kanji",instruction:"＿＿＿の言葉の読み方として最もよいものを、1・2・3・4から一つえらんでください。",question:'毎朝、新聞を読む<u>習慣</u>がある。',options:["しゅうかん","しゅかん","しゅっかん","じゅうかん"],answer:0,explanation:"習慣（しゅうかん）= kebiasaan. 習 dibaca しゅう, 慣 dibaca かん."},
+  {id:2,section:"moji",type:"Kanji no Kakikata — Menulis kanji",instruction:"＿＿＿のひらがなを漢字に直すとき、最もよいものを1・2・3・4から一つえらんでください。",question:'この問題は<u>むずかしい</u>です。',options:["難しい","難がしい","難じい","難くしい"],answer:0,explanation:"難しい（むずかしい）= sulit. Penulisan kanji yang benar adalah 難しい."},
+  {id:3,section:"moji",type:"Kotoba no Imi — Makna kata",instruction:"＿＿＿の言葉の意味に最も近いものを、1・2・3・4から一つえらんでください。",question:'彼女は<u>親切</u>な人です。',options:["やさしい","きびしい","いそがしい","さびしい"],answer:0,explanation:"親切（しんせつ）= ramah/baik hati. Paling dekat maknanya adalah やさしい (lembut/baik)."},
+  {id:4,section:"moji",type:"Bunpou — Kosakata dalam kalimat",instruction:"（　　）に入れるのに最もよいものを、1・2・3・4から一つえらんでください。",question:'駅まで歩いて（　　）かかります。',options:["じゅうふん","じゅっぷん","じっぷん","じゅうぷん"],answer:1,explanation:"じゅっぷん（10分）= 10 menit. Cara baca 10 menit yang benar adalah じゅっぷん."},
+  {id:5,section:"moji",type:"Goi Antonym — Lawan kata",instruction:"＿＿＿の言葉の反対の意味を持つものを、1・2・3・4から一つえらんでください。",question:'この荷物は<u>重い</u>です。',options:["かるい","おおきい","たかい","ひろい"],answer:0,explanation:"重い（おもい）= berat. Lawan katanya adalah 軽い（かるい）= ringan."},
+  {id:6,section:"dokkai",type:"Dokkai Pendek — Teks singkat",instruction:"つぎの文章を読んで、質問に答えてください。",passage:"　田中さんは毎日６時に起きます。朝ごはんを食べてから、７時に家を出ます。会社まで電車で30分かかります。会社は９時に始まります。",question:"田中さんは何時に家を出ますか。",options:["６時","７時","８時","９時"],answer:1,explanation:"文章に「７時に家を出ます」とあります。= Di teks disebutkan 'keluar rumah jam 7'."},
+  {id:7,section:"dokkai",type:"Dokkai — Maksud penulis",instruction:"つぎの文章を読んで、質問に答えてください。",passage:"　先週、図書館で本を借りました。本を読んだら、面白かったです。また借りたいと思います。図書館には色々な本があって、とても便利です。",question:"この人は図書館についてどう思っていますか。",options:["あまり好きではない","とても便利だと思う","遠くて不便だと思う","本が少ないと思う"],answer:1,explanation:"「とても便利です」という表現から、図書館がとても便利だと思っています。"},
+  {id:8,section:"dokkai",type:"Dokkai — Informasi pengumuman",instruction:"つぎのお知らせを読んで、質問に答えてください。",passage:"お知らせ\n日時：３月１５日（土）午後２時〜４時\n場所：市民センター２階\n内容：日本語スピーチコンテスト\n参加費：無料\n申し込み：３月１０日まで",question:"スピーチコンテストに参加するには、いつまでに申し込まなければなりませんか。",options:["３月１０日まで","３月１５日まで","午後２時まで","午後４時まで"],answer:0,explanation:"お知らせに「申し込み：３月１０日まで」と書いてあります。= Pendaftaran sampai 10 Maret."},
+  {id:9,section:"dokkai",type:"Dokkai — Alasan kejadian",instruction:"つぎの文章を読んで、質問に答えてください。",passage:"　昨日は雨が降っていたので、外でスポーツができませんでした。それで、家の中でゲームをしたり、映画を見たりしました。",question:"なぜ、外でスポーツができませんでしたか。",options:["体の具合が悪かったから","仕事があったから","雨が降っていたから","友達が来なかったから"],answer:2,explanation:"「雨が降っていたので」という理由があります。= Alasannya karena turun hujan."},
+  {id:10,section:"dokkai",type:"Dokkai — Urutan kejadian",instruction:"つぎの文章を読んで、質問に答えてください。",passage:"　山田さんは今日、まずスーパーへ行って野菜と肉を買いました。次に銀行でお金をおろしました。そして最後に郵便局で手紙を出しました。",question:"山田さんが２番目にしたことは何ですか。",options:["郵便局で手紙を出した","スーパーで買い物をした","銀行でお金をおろした","家に帰った"],answer:2,explanation:"順番は：①スーパー→②銀行→③郵便局。２番目は銀行でお金をおろすことです。"},
+  {
+    id: 11,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "＿＿＿の言葉の読み方として最もよいものを選んでください。",
+    question: "彼は<u>経験</u>が豊富です。",
+    options: ["けいけん", "けいげん", "きょうけん", "けけん"],
+    answer: 0,
+    explanation: "経験（けいけん）= pengalaman."
+  },
+  {
+    id: 12,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "",
+    question: "時間を<u>確認</u>してください。",
+    options: ["かくにん", "かくじん", "かくめい", "かくりん"],
+    answer: 0,
+    explanation: "確認（かくにん）= konfirmasi."
+  },
+  {
+    id: 13,
+    section: "moji",
+    type: "Kanji Kakikata",
+    instruction: "",
+    question: "これは<u>たいせつ</u>な書類です。",
+    options: ["大切", "大接", "大設", "大説"],
+    answer: 0,
+    explanation: "大切（たいせつ）= penting."
+  },
+  {
+    id: 14,
+    section: "moji",
+    type: "Kanji Kakikata",
+    instruction: "",
+    question: "明日は<u>ゆうめい</u>な人が来ます。",
+    options: ["有名", "有明", "有命", "有迷"],
+    answer: 0,
+    explanation: "有名（ゆうめい）= terkenal."
+  },
+  {
+    id: 15,
+    section: "moji",
+    type: "Kotoba no Imi",
+    instruction: "",
+    question: "この問題は<u>簡単</u>です。",
+    options: ["やさしい", "むずかしい", "たのしい", "おもしろい"],
+    answer: 0,
+    explanation: "簡単 = mudah."
+  },
+  {
+    id: 16,
+    section: "moji",
+    type: "Kotoba no Imi",
+    instruction: "",
+    question: "彼は<u>正直</u>な人です。",
+    options: ["うそをつかない", "いそがしい", "つよい", "やさしい"],
+    answer: 0,
+    explanation: "正直 = jujur."
+  },
+  {
+    id: 17,
+    section: "moji",
+    type: "Antonym",
+    instruction: "",
+    question: "この部屋は<u>広い</u>です。",
+    options: ["せまい", "あかるい", "たかい", "ながい"],
+    answer: 0,
+    explanation: "広い ↔ せまい"
+  },
+  {
+    id: 18,
+    section: "moji",
+    type: "Antonym",
+    instruction: "",
+    question: "今日は<u>暑い</u>です。",
+    options: ["さむい", "あつい", "ぬるい", "あかるい"],
+    answer: 0,
+    explanation: "暑い ↔ 寒い"
+  },
+  {
+    id: 19,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "毎日日本語を（　　）います。",
+    options: ["べんきょうし", "べんきょうして", "べんきょうする", "べんきょう"],
+    answer: 1,
+    explanation: "～ています bentuk sedang berlangsung."
+  },
+  {
+    id: 20,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "昨日、映画を（　　）。",
+    options: ["みます", "みました", "みて", "みる"],
+    answer: 1,
+    explanation: "昨日 → bentuk lampau."
+  },
+  {
+    id: 21,
+    section: "bunpou",
+    type: "Particle",
+    instruction: "",
+    question: "学校（　　）行きます。",
+    options: ["に", "で", "を", "と"],
+    answer: 0,
+    explanation: "Tujuan → に"
+  },
+  {
+    id: 22,
+    section: "bunpou",
+    type: "Particle",
+    instruction: "",
+    question: "友達（　　）会いました。",
+    options: ["に", "で", "を", "へ"],
+    answer: 0,
+    explanation: "Bertemu seseorang → に"
+  },
+  {
+    id: 23,
+    section: "dokkai",
+    type: "Pendek",
+    instruction: "",
+    passage: "私は毎日コーヒーを飲みます。でも、今日は飲みませんでした。",
+    question: "今日はコーヒーを飲みましたか。",
+    options: ["はい", "いいえ", "たぶん", "わかりません"],
+    answer: 1,
+    explanation: "飲みませんでした → tidak minum."
+  },
+  {
+    id: 24,
+    section: "dokkai",
+    type: "Pendek",
+    instruction: "",
+    passage: "田中さんは車で会社に行きます。電車は使いません。",
+    question: "田中さんは何で会社に行きますか。",
+    options: ["電車", "バス", "車", "自転車"],
+    answer: 2,
+    explanation: "車で行きます。"
+  },
+  {
+    id: 25,
+    section: "dokkai",
+    type: "Info",
+    instruction: "",
+    passage: "営業時間：9時〜18時\n定休日：日曜日",
+    question: "日曜日はどうですか。",
+    options: ["開いている", "休み", "午前だけ", "午後だけ"],
+    answer: 1,
+    explanation: "定休日 = libur."
+  },
+  {
+    id: 26,
+    section: "dokkai",
+    type: "Alasan",
+    instruction: "",
+    passage: "熱があったので、学校を休みました。",
+    question: "なぜ学校を休みましたか。",
+    options: ["忙しかった", "熱があった", "雨だった", "眠かった"],
+    answer: 1,
+    explanation: "理由：熱"
+  },
+  {
+    id: 27,
+    section: "dokkai",
+    type: "Urutan",
+    instruction: "",
+    passage: "朝ごはんを食べて、学校に行きました。",
+    question: "最初に何をしましたか。",
+    options: ["学校に行った", "ごはんを食べた", "寝た", "帰った"],
+    answer: 1,
+    explanation: "Pertama makan."
+  },
+  {
+    id: 28,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "",
+    question: "この店は<u>人気</u>があります。",
+    options: ["にんき", "じんき", "にんげん", "じんげん"],
+    answer: 0,
+    explanation: "人気（にんき）"
+  },
+  {
+    id: 29,
+    section: "moji",
+    type: "Kanji",
+    instruction: "",
+    question: "今日は<u>てんき</u>がいいです。",
+    options: ["天気", "天木", "天記", "天気い"],
+    answer: 0,
+    explanation: "天気 = cuaca"
+  },
+  {
+    id: 30,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "日本へ（　　）ことがあります。",
+    options: ["行く", "行った", "行き", "行って"],
+    answer: 1,
+    explanation: "Pengalaman → 行ったことがある"
+  },
+  {
+    id: 31,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "早く（　　）ください。",
+    options: ["来る", "来て", "来た", "来ます"],
+    answer: 1,
+    explanation: "Permintaan → ～てください"
+  },
+  {
+    id: 32,
+    section: "moji",
+    type: "Imi",
+    instruction: "",
+    question: "彼は<u>忙しい</u>です。",
+    options: ["ひま", "いそがしい", "やすい", "おそい"],
+    answer: 1,
+    explanation: "忙しい = sibuk"
+  },
+  {
+    id: 33,
+    section: "moji",
+    type: "Antonym",
+    instruction: "",
+    question: "値段が<u>高い</u>です。",
+    options: ["やすい", "おおきい", "ながい", "あつい"],
+    answer: 0,
+    explanation: "高い ↔ 安い"
+  },
+  {
+    id: 34,
+    section: "dokkai",
+    type: "Pendek",
+    instruction: "",
+    passage: "私は犬が好きです。猫はあまり好きじゃありません。",
+    question: "何が好きですか。",
+    options: ["猫", "犬", "魚", "鳥"],
+    answer: 1,
+    explanation: "犬が好き"
+  },
+  {
+    id: 35,
+    section: "dokkai",
+    type: "Info",
+    instruction: "",
+    passage: "バスは10分ごとに来ます。",
+    question: "バスはどのくらい来ますか。",
+    options: ["5分", "10分", "15分", "30分"],
+    answer: 1,
+    explanation: "10分ごと"
+  },
+  {
+    id: 36,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "日本語が（　　）なりたいです。",
+    options: ["上手", "上手に", "上手な", "上手く"],
+    answer: 1,
+    explanation: "～になりたい → adverb (に)"
+  },
+  {
+    id: 37,
+    section: "bunpou",
+    type: "Particle",
+    instruction: "",
+    question: "机の上（　　）本があります。",
+    options: ["に", "で", "を", "と"],
+    answer: 0,
+    explanation: "Lokasi keberadaan → に"
+  },
+  {
+    id: 38,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "",
+    question: "彼は<u>安全</u>に運転します。",
+    options: ["あんぜん", "あんせん", "あんねん", "あんじん"],
+    answer: 0,
+    explanation: "安全（あんぜん）"
+  },
+  {
+    id: 39,
+    section: "moji",
+    type: "Kanji",
+    instruction: "",
+    question: "これは<u>しんせつ</u>な説明です。",
+    options: ["親切", "親設", "新切", "心切"],
+    answer: 0,
+    explanation: "親切 = baik hati"
+  },
+  {
+    id: 40,
+    section: "dokkai",
+    type: "Alasan",
+    instruction: "",
+    passage: "お金がなかったので、買いませんでした。",
+    question: "なぜ買いませんでしたか。",
+    options: ["高かった", "お金がなかった", "時間がなかった", "忘れた"],
+    answer: 1,
+    explanation: "理由：お金がなかった"
+  },
+  {
+    id: 41,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "",
+    question: "この仕事は<u>重要</u>です。",
+    options: ["じゅうよう", "じゅよう", "じゅうよ", "じょうよう"],
+    answer: 0,
+    explanation: "重要（じゅうよう）= penting."
+  },
+  {
+    id: 42,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "",
+    question: "会議の<u>資料</u>を準備してください。",
+    options: ["しりょう", "しよう", "しぎょう", "しろう"],
+    answer: 0,
+    explanation: "資料（しりょう）= dokumen."
+  },
+  {
+    id: 43,
+    section: "moji",
+    type: "Kanji",
+    instruction: "",
+    question: "彼は<u>まじめ</u>な人です。",
+    options: ["真面目", "真正目", "真面め", "真目"],
+    answer: 0,
+    explanation: "真面目（まじめ）= serius."
+  },
+  {
+    id: 44,
+    section: "moji",
+    type: "Kanji",
+    instruction: "",
+    question: "この機械は<u>あんぜん</u>です。",
+    options: ["安全", "安然", "安全", "安前"],
+    answer: 0,
+    explanation: "安全（あんぜん）"
+  },
+  {
+    id: 45,
+    section: "moji",
+    type: "Imi",
+    instruction: "",
+    question: "彼は<u>有名</u>な人です。",
+    options: ["知られている", "忙しい", "高い", "強い"],
+    answer: 0,
+    explanation: "有名 = terkenal."
+  },
+  {
+    id: 46,
+    section: "moji",
+    type: "Imi",
+    instruction: "",
+    question: "この料理は<u>特別</u>です。",
+    options: ["普通", "特別", "簡単", "便利"],
+    answer: 1,
+    explanation: "特別 = khusus."
+  },
+  {
+    id: 47,
+    section: "moji",
+    type: "Antonym",
+    instruction: "",
+    question: "この道は<u>長い</u>です。",
+    options: ["みじかい", "おそい", "はやい", "たかい"],
+    answer: 0,
+    explanation: "長い ↔ 短い"
+  },
+  {
+    id: 48,
+    section: "moji",
+    type: "Antonym",
+    instruction: "",
+    question: "今日は<u>寒い</u>です。",
+    options: ["あつい", "つめたい", "ぬるい", "あかるい"],
+    answer: 0,
+    explanation: "寒い ↔ 暑い"
+  },
+  {
+    id: 49,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "毎日運動を（　　）います。",
+    options: ["する", "して", "します", "した"],
+    answer: 1,
+    explanation: "～ています"
+  },
+  {
+    id: 50,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "昨日、友達に（　　）。",
+    options: ["会う", "会いました", "会って", "会い"],
+    answer: 1,
+    explanation: "Lampau → 会いました"
+  },
+  {
+    id: 51,
+    section: "bunpou",
+    type: "Particle",
+    instruction: "",
+    question: "学校（　　）勉強します。",
+    options: ["に", "で", "を", "と"],
+    answer: 1,
+    explanation: "Tempat aktivitas → で"
+  },
+  {
+    id: 52,
+    section: "bunpou",
+    type: "Particle",
+    instruction: "",
+    question: "日本（　　）行きたいです。",
+    options: ["に", "で", "を", "と"],
+    answer: 0,
+    explanation: "Tujuan → に"
+  },
+  {
+    id: 53,
+    section: "dokkai",
+    type: "Pendek",
+    instruction: "",
+    passage: "私は毎朝パンを食べます。でも、今日はごはんを食べました。",
+    question: "今日は何を食べましたか。",
+    options: ["パン", "ごはん", "肉", "魚"],
+    answer: 1,
+    explanation: "今日はごはん"
+  },
+  {
+    id: 54,
+    section: "dokkai",
+    type: "Pendek",
+    instruction: "",
+    passage: "山田さんはバスで会社に行きます。",
+    question: "何で会社に行きますか。",
+    options: ["電車", "バス", "車", "自転車"],
+    answer: 1,
+    explanation: "バスで行く"
+  },
+  {
+    id: 55,
+    section: "dokkai",
+    type: "Info",
+    instruction: "",
+    passage: "営業時間：8時〜17時\n休み：土曜日",
+    question: "土曜日はどうですか。",
+    options: ["開いている", "休み", "午後だけ", "午前だけ"],
+    answer: 1,
+    explanation: "休み"
+  },
+  {
+    id: 56,
+    section: "dokkai",
+    type: "Alasan",
+    instruction: "",
+    passage: "雨が降ったので、出かけませんでした。",
+    question: "なぜ出かけませんでしたか。",
+    options: ["忙しい", "雨", "疲れた", "寒い"],
+    answer: 1,
+    explanation: "理由：雨"
+  },
+  {
+    id: 57,
+    section: "dokkai",
+    type: "Urutan",
+    instruction: "",
+    passage: "朝ごはんを食べて、学校へ行って、勉強しました。",
+    question: "最初は何ですか。",
+    options: ["学校", "勉強", "ごはん", "帰る"],
+    answer: 2,
+    explanation: "最初：ごはん"
+  },
+  {
+    id: 58,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "",
+    question: "この店は<u>便利</u>です。",
+    options: ["べんり", "べんに", "べんれい", "べりん"],
+    answer: 0,
+    explanation: "便利"
+  },
+  {
+    id: 59,
+    section: "moji",
+    type: "Kanji",
+    instruction: "",
+    question: "今日は<u>あつい</u>です。",
+    options: ["暑い", "熱い", "厚い", "温い"],
+    answer: 0,
+    explanation: "暑い = cuaca panas"
+  },
+  {
+    id: 60,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "日本語が上手に（　　）たいです。",
+    options: ["なる", "なり", "なって", "なった"],
+    answer: 0,
+    explanation: "～たい → bentuk kamus"
+  },
+  {
+    id: 61,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "早く家に（　　）ください。",
+    options: ["帰る", "帰って", "帰った", "帰り"],
+    answer: 1,
+    explanation: "～てください"
+  },
+  {
+    id: 62,
+    section: "moji",
+    type: "Imi",
+    instruction: "",
+    question: "彼は<u>忙しい</u>です。",
+    options: ["ひま", "いそがしい", "おそい", "やすい"],
+    answer: 1,
+    explanation: "忙しい"
+  },
+  {
+    id: 63,
+    section: "moji",
+    type: "Antonym",
+    instruction: "",
+    question: "この問題は<u>簡単</u>です。",
+    options: ["むずかしい", "やさしい", "おもしろい", "たのしい"],
+    answer: 0,
+    explanation: "簡単 ↔ 難しい"
+  },
+  {
+    id: 64,
+    section: "dokkai",
+    type: "Pendek",
+    instruction: "",
+    passage: "私は音楽が好きです。毎日聞きます。",
+    question: "何が好きですか。",
+    options: ["音楽", "映画", "本", "スポーツ"],
+    answer: 0,
+    explanation: "音楽が好き"
+  },
+  {
+    id: 65,
+    section: "dokkai",
+    type: "Info",
+    instruction: "",
+    passage: "電車は5分ごとに来ます。",
+    question: "どのくらい来ますか。",
+    options: ["5分", "10分", "15分", "30分"],
+    answer: 0,
+    explanation: "5分ごと"
+  },
+  {
+    id: 66,
+    section: "bunpou",
+    type: "Grammar",
+    instruction: "",
+    question: "毎日勉強（　　）ほうがいいです。",
+    options: ["する", "した", "して", "します"],
+    answer: 0,
+    explanation: "～ほうがいい"
+  },
+  {
+    id: 67,
+    section: "bunpou",
+    type: "Particle",
+    instruction: "",
+    question: "机の下（　　）猫がいます。",
+    options: ["に", "で", "を", "と"],
+    answer: 0,
+    explanation: "存在 → に"
+  },
+  {
+    id: 68,
+    section: "moji",
+    type: "Yomikata",
+    instruction: "",
+    question: "彼は<u>安心</u>しました。",
+    options: ["あんしん", "あんせん", "あんじん", "あんにん"],
+    answer: 0,
+    explanation: "安心"
+  },
+  {
+    id: 69,
+    section: "moji",
+    type: "Kanji",
+    instruction: "",
+    question: "彼は<u>しずか</u>です。",
+    options: ["静か", "静け", "静い", "青か"],
+    answer: 0,
+    explanation: "静か"
+  },
+  {
+    id: 70,
+    section: "dokkai",
+    type: "Alasan",
+    instruction: "",
+    passage: "疲れたので、早く寝ました。",
+    question: "なぜ早く寝ましたか。",
+    options: ["忙しい", "疲れた", "寒い", "時間がない"],
+    answer: 1,
+    explanation: "理由：疲れた"
+  }
+];
+
+let cur=0,answers=new Array(70).fill(null),revealed=new Array(70).fill(false),timerSec=3600,timerInterval,finished=false;
+
+function pad(n){return String(n).padStart(2,'0');}
+function fmt(s){return pad(Math.floor(s/3600))+':'+pad(Math.floor((s%3600)/60))+':'+pad(s%60);}
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    if(finished)return;
+    timerSec--;
+    const el=document.getElementById('tmr');
+    if(el){el.textContent=fmt(timerSec);if(timerSec<=300)el.className='timer-box warn';}
+    if(timerSec<=0){clearInterval(timerInterval);showResult();}
+  },1000);
+}
+
+function selectAnswer(i){if(revealed[cur])return;answers[cur]=i;render();}
+function revealAnswer(){if(answers[cur]===null)return;revealed[cur]=true;render();}
+function nextSoal(){if(cur<9){cur++;render();}else showResult();}
+function prevSoal(){if(cur>0){cur--;render();}}
+function goTo(i){cur=i;render();}
+function showResult(){finished=true;clearInterval(timerInterval);render();}
+function restart(){cur=0;answers=new Array(10).fill(null);revealed=new Array(10).fill(false);finished=false;timerSec=3600;startTimer();render();}
+
+function render(){
+  const app=document.getElementById('app');
+  if(finished){
+    const ok=answers.filter((a,i)=>a===soal[i].answer).length;
+    const pct=Math.round(ok/10*100);
+    const msg=pct>=70?'合格ライン達成！おめでとう！':'もう少し練習が必要です。頑張って！';
+    app.innerHTML=`<div class="result-card">
+      <div style="font-size:40px;margin-bottom:8px;">📋</div>
+      <div class="result-score">${ok}/10</div>
+      <div class="result-label">${pct}% — ${msg}</div>
+      <div class="result-grid">
+        <div class="stat-card"><div class="stat-num" style="color:#00c896">${ok}</div><div class="stat-lbl">Benar</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#ff5252">${10-ok}</div><div class="stat-lbl">Salah</div></div>
+        <div class="stat-card"><div class="stat-num">${pct}%</div><div class="stat-lbl">Nilai</div></div>
+      </div>
+      <div class="soal-dot-row" style="justify-content:center;margin-bottom:20px">
+        ${soal.map((s,i)=>{const c=answers[i]===s.answer?'correct-dot':'wrong-dot';return`<div class="soal-dot ${c}" onclick="cur=${i};finished=false;render()">${i+1}</div>`;}).join('')}
+      </div>
+      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:14px" onclick="restart()">Ulangi Latihan</button>
+    </div>`;
+    return;
+  }
+
+  const s=soal[cur];
+  const isRev=revealed[cur];
+  const uAns=answers[cur];
+
+  const dots=soal.map((x,i)=>{
+    let c='';
+    if(i===cur)c='active';
+    else if(revealed[i])c=answers[i]===x.answer?'correct-dot':'wrong-dot';
+    else if(answers[i]!==null)c='answered';
+    return`<div class="soal-dot ${c}" onclick="goTo(${i})">${i+1}</div>`;
+  }).join('');
+
+  const passage=s.passage?`<div class="passage-box" style="white-space:pre-line">${s.passage}</div>`:'';
+
+  const opts=s.options.map((o,i)=>{
+    let c='';
+    if(isRev){if(i===s.answer)c='correct';else if(i===uAns&&i!==s.answer)c='wrong';}
+    else if(i===uAns)c='selected';
+    const lbl=String.fromCharCode(65+i);
+    return`<div class="opt ${c}" onclick="selectAnswer(${i})">
+      <span class="opt-label">${lbl}</span>
+      <span class="opt-text">${o}</span>
+    </div>`;
+  }).join('');
+
+  const expl=isRev?`<div class="explanation">💡 ${s.explanation}</div>`:'';
+
+  const revBtn=!isRev&&uAns!==null?`<button class="btn btn-primary" onclick="revealAnswer()">Cek Jawaban ✓</button>`:'';
+  const nxtBtn=isRev?(cur<9?`<button class="btn btn-primary" onclick="nextSoal()">Berikutnya →</button>`:`<button class="btn btn-primary" onclick="showResult()">Lihat Hasil</button>`):'';
+  const allDone=answers.every(a=>a!==null)&&!isRev&&!revBtn?`<button class="btn btn-primary" onclick="showResult()">Lihat Hasil</button>`:'';
+
+  app.innerHTML=`
+    <div class="header">
+      <div class="title">JLPT N4 練習</div>
+      <div class="timer-box${timerSec<=300?' warn':''}" id="tmr">${fmt(timerSec)}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${(cur+1)*10}%"></div></div>
+    <div class="soal-dot-row">${dots}</div>
+    <span class="section-badge ${s.section==='moji'?'badge-moji':'badge-dokkai'}">${s.section==='moji'?'文字・語彙':'読解'}</span>
+    <div class="soal-num">Soal ${cur+1} / 10 　 ${s.type}</div>
+    <div class="soal-instruction">${s.instruction}</div>
+    ${passage}
+    <div class="soal-text">${s.question}</div>
+    <div class="options">${opts}</div>
+    ${expl}
+    <div class="nav">
+      <button class="btn" onclick="prevSoal()" ${cur===0?'disabled':''}>← Kembali</button>
+      <div class="nav-right">${revBtn}${nxtBtn}${allDone}</div>
+    </div>
+  `;
+}
+
+render();
+startTimer();
+</script>
